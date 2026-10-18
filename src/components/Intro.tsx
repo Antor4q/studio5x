@@ -34,34 +34,31 @@ export default function Intro() {
         scrollTrigger: { trigger: ".intro-label", start: "top 90%" },
       });
 
-      // Word entrance: inner span mask er niche theke uthe ashe
-      gsap.from(".intro-word", {
-        yPercent: 120,
-        duration: 1.2,
-        ease: "power4.out",
-        stagger: 0.06,
-        scrollTrigger: { trigger: ".intro-statement-outer", start: "top 90%" },
-      });
-
       // ---------- SCROLL TEXT REVEAL ----------
-      // outer span (.intro-word-dim) er opacity: dim -> full white, scroll er sathe
-      // range chhoto, tai statement screen e dhukle-i taratari reveal shesh hoy
-      gsap.fromTo(
-        ".intro-word-dim",
-        { opacity: 0.15 },
-        {
-          opacity: 1,
-          ease: "none",
-          stagger: 0.3,
-          scrollTrigger: {
-            trigger: ".intro-statement-outer",
-            start: "top 85%",
-            end: "bottom 70%",
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        }
-      );
+      // timeline/stagger na, scroll progress theke proti word er opacity calculate kori.
+      // tai word gula ek ek kore, order e, kono jhatka chhara reveal hoy.
+      const words = gsap.utils.toArray<HTMLElement>(".intro-word");
+      const DIM = 0.15;
+      const SPREAD = 2; // ekta word full hote koyta word er somoy lage
+
+      const paint = (progress: number) => {
+        const p = progress * (words.length + SPREAD);
+        words.forEach((w, i) => {
+          const t = gsap.utils.clamp(0, 1, (p - i) / SPREAD);
+          w.style.opacity = String(DIM + (1 - DIM) * t);
+        });
+      };
+
+      paint(0);
+
+      ScrollTrigger.create({
+        trigger: ".intro-statement-outer",
+        start: "top 85%",
+        end: "bottom 60%",
+        invalidateOnRefresh: true,
+        onUpdate: (self) => paint(self.progress),
+        onRefresh: (self) => paint(self.progress),
+      });
 
       // Image clip reveal
       gsap.fromTo(
@@ -103,20 +100,25 @@ export default function Intro() {
 
       // ---------- PARALLAX ----------
 
+      // mobile/tablet e parallax adha, noile stacked layout e overlap hoy
+      const factor = () => (window.innerWidth < 1024 ? 0.5 : 1);
+
       // data-speed: positive = beshi upore uthe, negative = slow
+      // NOTE: statement e data-speed nai, ota static thake
       gsap.utils.toArray<HTMLElement>("[data-speed]").forEach((el) => {
         const speed = Number(el.dataset.speed);
         gsap.fromTo(
           el,
-          { y: speed * 90 },
+          { y: () => speed * 90 * factor() },
           {
-            y: speed * -90,
+            y: () => speed * -90 * factor(),
             ease: "none",
             scrollTrigger: {
               trigger: root,
               start: "top bottom",
               end: "bottom top",
               scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         );
@@ -139,13 +141,33 @@ export default function Intro() {
       );
     }, root);
 
-    // font / image load howar pore position abar calculate
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refresh);
+    // ---------- REFRESH FIX ----------
+    // debounce: scroll cholar somoy bar bar refresh hole scrub jhatka khay
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => ScrollTrigger.refresh(), 150);
+    };
+
+    if (document.readyState === "complete") refresh();
+    else window.addEventListener("load", refresh);
+
     document.fonts?.ready.then(refresh);
 
+    // shudhu width change e refresh (mobile address bar er height change e na)
+    let lastW = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth !== lastW) {
+        lastW = window.innerWidth;
+        refresh();
+      }
+    };
+    window.addEventListener("resize", onResize);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("load", refresh);
+      window.removeEventListener("resize", onResize);
       ctx.revert();
     };
   }, []);
@@ -153,38 +175,38 @@ export default function Intro() {
   return (
     <section
       ref={rootRef}
-      className="relative w-full overflow-hidden bg-[#0d0c0b] px-6 py-28 font-sans uppercase text-white lg:px-28 lg:py-48"
+      className="relative w-full overflow-hidden bg-[#0d0c0b] px-5 py-20 font-sans uppercase text-white sm:px-8 sm:py-24 md:px-12 lg:px-28 lg:py-28"
     >
       {/* Label */}
-      <div data-speed="0.3" className="mb-10 lg:mb-16">
+      <div data-speed="0.3" className="mb-8 lg:mb-12">
         <p className="intro-label overflow-hidden text-xs font-medium tracking-[0.3em] text-white/50">
           <span className="intro-label-inner block">( About the studio )</span>
         </p>
       </div>
 
-      {/* Big statement: outer = static trigger, bhitore parallax wrapper */}
+      {/* Big statement: static, parallax nai */}
       <div className="intro-statement-outer">
-        <div data-speed="0.5">
-          <h2 className="max-w-6xl text-3xl font-semibold leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
-            {statement.split(" ").map((word, i) => (
-              <span key={i} className="intro-word-dim mr-[0.25em] inline-block align-top">
-                <span className="inline-block overflow-hidden pb-[0.08em] align-top">
-                  <span className="intro-word inline-block">{word}</span>
-                </span>
-              </span>
-            ))}
-          </h2>
-        </div>
+        <h2 className="max-w-6xl text-3xl font-semibold leading-[1.1] tracking-tight sm:text-5xl lg:text-7xl">
+          {statement.split(" ").map((word, i) => (
+            <span
+              key={i}
+              className="intro-word mr-[0.25em] inline-block align-top"
+              style={{ opacity: 0.15 }}
+            >
+              {word}
+            </span>
+          ))}
+        </h2>
       </div>
 
       {/* Image + details */}
-      <div className="mt-20 grid gap-16 lg:mt-32 lg:grid-cols-12 lg:gap-8">
+      <div className="mt-16 grid gap-14 sm:mt-20 lg:mt-24 lg:grid-cols-12 lg:gap-8">
         {/* Image column */}
-        <div data-speed="-0.25" className="lg:col-span-4">
+        <div data-speed="-0.25" className="mx-auto w-full max-w-md sm:max-w-lg lg:col-span-4 lg:mx-0 lg:max-w-none">
           <div className="intro-image-wrap relative aspect-[4/5] w-full overflow-hidden">
             <div className="intro-image-inner absolute inset-x-0 -top-[20%] h-[140%]">
               <Image
-                src="/images/ina-04.jpg"
+                src="/images/intro.webp"
                 alt="Studio interior"
                 fill
                 sizes="(min-width: 1024px) 33vw, 100vw"
@@ -195,23 +217,23 @@ export default function Intro() {
         </div>
 
         {/* Right column */}
-        <div data-speed="0.7" className="lg:col-span-5 lg:col-start-8">
-          <div className="flex h-full flex-col justify-between gap-14">
-            <p className="intro-fade max-w-md text-xs leading-[1.9] tracking-widest text-white/60 lg:text-sm">
+        <div data-speed="0.7" className="lg:col-span-6 lg:col-start-7">
+          <div className="flex h-full flex-col justify-between gap-12 lg:gap-14">
+            <p className="intro-fade max-w-md text-xs leading-[1.9] tracking-widest text-white/60 sm:text-sm">
               Studio 5x is an interior design studio crafting residential and commercial spaces
               with a focus on light, material and proportion. From the first sketch to the final
               piece of furniture, we shape interiors that are made to be lived in.
             </p>
 
             <div>
-              <div className="intro-fade grid grid-cols-3 gap-6 border-t border-white/15 pt-8">
+              <div className="intro-fade grid grid-cols-3 gap-4 border-t border-white/15 pt-8 sm:gap-6">
                 {stats.map((s) => (
                   <div key={s.label}>
-                    <div className="flex items-baseline text-4xl font-semibold tracking-tight lg:text-6xl">
+                    <div className="flex items-baseline text-4xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-[clamp(2.5rem,4.2vw,5.5rem)]">
                       <span data-count={s.value}>0</span>
                       <span>{s.suffix}</span>
                     </div>
-                    <p className="mt-2 text-[10px] tracking-widest text-white/50 lg:text-xs">
+                    <p className="mt-3 text-[10px] leading-relaxed tracking-widest text-white/50 sm:text-xs">
                       {s.label}
                     </p>
                   </div>
@@ -220,7 +242,7 @@ export default function Intro() {
 
               <Link
                 href="/about"
-                className="intro-fade group mt-12 inline-flex items-center gap-3 text-sm font-medium tracking-widest"
+                className="intro-fade group mt-10 inline-flex items-center gap-3 text-sm font-medium tracking-widest lg:mt-12"
               >
                 <span className="border-b border-white/40 pb-1 transition-colors group-hover:border-white">
                   Our story

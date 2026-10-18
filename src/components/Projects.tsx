@@ -17,7 +17,7 @@ const projects = [
     location: "Dhaka",
     year: "2025",
     desc: "A warm, light-filled family villa built around a central courtyard and natural stone.",
-    image: "/images/ina-04.jpg",
+    image: "/images/pro1.jpg",
   },
   {
     slug: "atelier-nine",
@@ -26,7 +26,7 @@ const projects = [
     location: "Gulshan, Dhaka",
     year: "2025",
     desc: "A creative studio workspace with flexible zones, raw textures and layered lighting.",
-    image: "/images/ina-04.jpg",
+    image: "/images/pro2.jpg",
   },
   {
     slug: "casa-verde",
@@ -35,7 +35,7 @@ const projects = [
     location: "Chattogram",
     year: "2024",
     desc: "A hillside home that blurs indoors and outdoors with timber, glass and greenery.",
-    image: "/images/ina-04.jpg",
+    image: "/images/pro3.webp",
   },
   {
     slug: "the-loft",
@@ -44,29 +44,10 @@ const projects = [
     location: "Sylhet",
     year: "2024",
     desc: "A boutique stay with double-height spaces, soft palettes and bespoke furniture.",
-    image: "/images/ina-04.jpg",
+    image: "/images/pro4.webp",
   },
-  {
-    slug: "maison-blanc",
-    name: "Maison Blanc",
-    category: "Residential",
-    location: "Banani, Dhaka",
-    year: "2023",
-    desc: "A calm, gallery-like apartment designed around art, proportion and quiet materials.",
-    image: "/images/ina-04.jpg",
-  },
-  {
-    slug: "studio-eight",
-    name: "Studio Eight",
-    category: "Commercial",
-    location: "Dhanmondi, Dhaka",
-    year: "2023",
-    desc: "A compact showroom where every surface is made to show off the product.",
-    image: "/images/ina-04.jpg",
-  },
+  
 ];
-
-const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Projects() {
   const rootRef = useRef<HTMLElement>(null);
@@ -121,7 +102,7 @@ export default function Projects() {
           duration: 1,
           ease: "power4.out",
           stagger: 0.08,
-          scrollTrigger: { trigger: item, start: "top 70%" },
+          scrollTrigger: { trigger: item, start: "top 75%" },
         });
       });
 
@@ -164,14 +145,22 @@ export default function Projects() {
         const prev = infos[current];
         const nxt = infos[next];
 
+        // fast scroll e jodi beshi info ekshathe bhese thake, baki shob lukiye dao
+        infos.forEach((el, k) => {
+          if (k === next || k === current) return;
+          gsap.killTweensOf(linesOf(el));
+          gsap.set(el, { autoAlpha: 0 });
+          gsap.set(linesOf(el), { yPercent: 110 });
+        });
+
         gsap.killTweensOf([...linesOf(prev), ...linesOf(nxt)]);
 
         // ager info upore (ba niche) berhiye jay
         gsap.to(linesOf(prev), {
           yPercent: -110 * dir,
-          duration: 0.6,
+          duration: 0.5,
           ease: "power3.in",
-          stagger: 0.03,
+          stagger: 0.025,
           onComplete: () => {
             gsap.set(prev, { autoAlpha: 0 });
           },
@@ -182,31 +171,52 @@ export default function Projects() {
         gsap.fromTo(
           linesOf(nxt),
           { yPercent: 110 * dir },
-          { yPercent: 0, duration: 0.9, ease: "power4.out", stagger: 0.06, delay: 0.25 }
+          { yPercent: 0, duration: 0.9, ease: "power4.out", stagger: 0.06, delay: 0.12 }
         );
 
         current = next;
       };
 
-      // je image screen er majhe, oi project active
+      // image screen e dhukle-i content change:
+      // niche scroll: image er top viewport er 85% e pouchhale
+      // upore scroll: image er bottom viewport er 15% e pouchhale
       items.forEach((item, i) => {
         ScrollTrigger.create({
           trigger: item,
-          start: "top 55%",
-          end: "bottom 55%",
+          start: "top 85%",
+          end: "bottom 15%",
           onEnter: () => goTo(i),
           onEnterBack: () => goTo(i),
         });
       });
     });
 
-    // font / image load howar pore position abar calculate
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refresh);
+    // ---------- REFRESH FIX ----------
+    // font/image load er pore layout shift hole position abar calculate
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => ScrollTrigger.refresh(), 150);
+    };
+
+    if (document.readyState === "complete") refresh();
+    else window.addEventListener("load", refresh);
     document.fonts?.ready.then(refresh);
 
+    // shudhu width change e refresh (mobile address bar er height change e na)
+    let lastW = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth !== lastW) {
+        lastW = window.innerWidth;
+        refresh();
+      }
+    };
+    window.addEventListener("resize", onResize);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("load", refresh);
+      window.removeEventListener("resize", onResize);
       mm.revert();
       ctx.revert();
     };
@@ -258,18 +268,15 @@ export default function Projects() {
         View
       </div>
 
-      {/* Header */}
-      <div className="fp-head px-6 pb-16 pt-28 lg:px-28 lg:pb-20 lg:pt-44">
-        <div className="mb-8 flex items-end justify-between lg:mb-12">
+      {/* Header: pt nai */}
+      <div className="fp-head px-5 pb-12 sm:px-8 sm:pb-14 md:px-12 lg:px-28 lg:pb-20">
+        <div className="mb-8 lg:mb-12">
           <p className="overflow-hidden text-xs font-medium tracking-[0.3em] text-white/50">
             <span className="fp-head-inner block">( Selected work )</span>
           </p>
-          <p className="overflow-hidden text-xs font-medium tracking-[0.3em] text-white/50">
-            <span className="fp-head-inner block">{pad(projects.length)} Projects</span>
-          </p>
         </div>
 
-        <h2 className="font-serif text-5xl font-bold leading-[0.95] tracking-tight sm:text-7xl lg:text-[120px]">
+        <h2 className="font-serif text-5xl font-bold leading-[0.95] tracking-tight sm:text-7xl lg:text-[clamp(5rem,9vw,7.5rem)]">
           <span className="block overflow-hidden pb-[0.08em]">
             <span className="fp-head-inner block">Featured</span>
           </span>
@@ -280,7 +287,7 @@ export default function Projects() {
       </div>
 
       {/* Split layout: left sticky info (desktop), right scrolling images */}
-      <div className="fp-grid grid gap-12 px-6 pb-24 lg:grid-cols-12 lg:gap-10 lg:px-28 lg:pb-32">
+      <div className="fp-grid grid gap-12 px-5 pb-20 sm:px-8 md:px-12 lg:grid-cols-12 lg:gap-10 lg:px-28 lg:pb-32">
         {/* LEFT: sticky info, shudhu desktop e */}
         <div className="hidden lg:col-span-5 lg:block">
           <div className="sticky top-0 h-svh">
@@ -291,13 +298,8 @@ export default function Projects() {
                   i === 0 ? "" : "invisible"
                 }`}
               >
-                {/* Top: number + category */}
-                <div className="flex items-center justify-between text-xs font-medium tracking-[0.25em] text-white/60">
-                  <span className="block overflow-hidden">
-                    <span className="fp-line block">
-                      {pad(i + 1)} / {pad(projects.length)}
-                    </span>
-                  </span>
+                {/* Top: category */}
+                <div className="flex items-center text-xs font-medium tracking-[0.25em] text-white/60">
                   <span className="block overflow-hidden">
                     <span className="fp-line block">{p.category}</span>
                   </span>
@@ -305,7 +307,7 @@ export default function Projects() {
 
                 {/* Bottom: name, meta, desc, link */}
                 <div className="flex flex-col gap-6">
-                  <h3 className="font-sans text-6xl font-semibold leading-[0.95] tracking-tight xl:text-7xl">
+                  <h3 className="font-sans text-[clamp(2.5rem,4.6vw,5rem)] font-semibold leading-[0.95] tracking-tight">
                     <span className="block overflow-hidden pb-[0.1em]">
                       <span className="fp-line block">{p.name}</span>
                     </span>
@@ -343,7 +345,7 @@ export default function Projects() {
         </div>
 
         {/* RIGHT: scrolling images */}
-        <div className="flex flex-col gap-16 lg:col-span-7 lg:gap-24 lg:py-[11svh]">
+        <div className="flex flex-col gap-14 sm:gap-16 lg:col-span-7 lg:gap-24 lg:py-[11svh]">
           {projects.map((p, i) => (
             <article key={p.slug} className="fp-item">
               <Link
@@ -351,7 +353,7 @@ export default function Projects() {
                 aria-label={p.name}
                 className="fp-card group/card block"
               >
-                <div className="fp-image-wrap relative aspect-[4/5] w-full overflow-hidden bg-black lg:aspect-auto lg:h-[78svh]">
+                <div className="fp-image-wrap relative aspect-[4/5] w-full overflow-hidden bg-black sm:aspect-[4/3] lg:aspect-auto lg:h-[78svh]">
                   {/* inner frame er cheye lomba, tai parallax e faka dekha jabe na */}
                   <div className="fp-image-inner absolute inset-x-0 -top-[8%] h-[116%]">
                     <Image
@@ -366,46 +368,30 @@ export default function Projects() {
                 </div>
               </Link>
 
-              {/* Mobile text: image er niche (desktop e hide, left sticky e dekhay) */}
+              {/* Mobile/tablet text: image er niche (desktop e hide, left sticky e dekhay) */}
               <div className="mt-5 flex flex-col gap-3 lg:hidden">
-                <div className="flex items-center justify-between text-xs font-medium tracking-[0.25em] text-white/50">
-                  <span className="block overflow-hidden">
-                    <span className="fp-m-line block">
-                      {pad(i + 1)} / {pad(projects.length)}
-                    </span>
-                  </span>
-                  <span className="block overflow-hidden">
-                    <span className="fp-m-line block">{p.category}</span>
-                  </span>
-                </div>
-
                 <h3 className="text-4xl font-semibold leading-[1] tracking-tight sm:text-5xl">
                   <span className="block overflow-hidden pb-[0.1em]">
                     <span className="fp-m-line block">{p.name}</span>
                   </span>
                 </h3>
 
-                <p className="block overflow-hidden text-xs font-medium tracking-[0.25em] text-white/60">
-                  <span className="fp-m-line block">
-                    {p.location} — {p.year}
+                <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-[11px] font-medium tracking-[0.25em] text-white/60 sm:text-xs">
+                  <span className="block overflow-hidden">
+                    <span className="fp-m-line block">{p.category}</span>
                   </span>
-                </p>
+                  <span className="block overflow-hidden">
+                    <span className="fp-m-line block">
+                      {p.location} — {p.year}
+                    </span>
+                  </span>
+                </div>
               </div>
             </article>
           ))}
         </div>
       </div>
 
-      {/* All projects button */}
-      <div className="fp-cta flex justify-center px-6 pb-28 lg:pb-44">
-        <Link
-          href="/work"
-          className="group inline-flex items-center gap-4 border border-white/30 px-8 py-5 text-sm font-medium tracking-[0.25em] transition-colors duration-500 hover:bg-[#F6F5F4] hover:text-black"
-        >
-          All projects
-          <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-        </Link>
-      </div>
     </section>
   );
 }

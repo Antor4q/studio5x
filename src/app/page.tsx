@@ -1,13 +1,13 @@
 
-import BeforeAfter from "@/components/Beforeafter";
+import CTA from "@/components/CTA";
 import FounderQuote from "@/components/Founderquote";
 import Hero from "@/components/Hero";
 import Intro from "@/components/Intro";
-import Marquee from "@/components/Marquee";
+;
 import Process from "@/components/Process";
 import Projects from "@/components/Projects";
 import Services from "@/components/Services";
-import Testimonials from "@/components/Testimonials";
+
 
 
 export default function Home() {
@@ -20,9 +20,9 @@ export default function Home() {
       <Services/>
       <Process/>
       <FounderQuote/>
-      <Marquee/>
-      <BeforeAfter/>
-      <Testimonials/>
+     
+     <CTA/>
+  
     </div>
   );
 }

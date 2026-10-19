@@ -7,8 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// placeholder, nijer studio info diye replace koro
-const STUDIO = "Studio Name";
+const STUDIO = "Studio 5X";
 const nav = [
   { label: "Projects", href: "/work" },
   { label: "Services", href: "/services" },
@@ -23,6 +22,32 @@ const socials = [
 
 export default function Footer() {
   const rootRef = useRef<HTMLElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLHeadingElement>(null);
+
+  // "Studio 5X" ke container er content width e fit kore
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const name = nameRef.current;
+    if (!wrap || !name) return;
+
+    const fit = () => {
+      const base = 100;
+      name.style.fontSize = `${base}px`;
+      const textW = name.scrollWidth;
+      const available = wrap.clientWidth;
+      if (!textW || !available) return;
+      name.style.fontSize = `${(base * available) / textW}px`;
+      ScrollTrigger.refresh();
+    };
+
+    fit();
+    document.fonts?.ready.then(fit);
+    const ro = new ResizeObserver(fit);
+    ro.observe(wrap);
+
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -40,7 +65,6 @@ export default function Footer() {
 
     const refresh = () => ScrollTrigger.refresh();
     window.addEventListener("load", refresh);
-    document.fonts?.ready.then(refresh);
 
     return () => {
       window.removeEventListener("load", refresh);
@@ -52,12 +76,14 @@ export default function Footer() {
     "inline-block transition-colors duration-300 hover:text-white text-white/60";
 
   return (
+    // padding ekhane, tai bhitorer shob section ek-i container width pay
     <footer
       ref={rootRef}
-      className="relative w-full overflow-hidden bg-[#0d0c0b] px-6 pt-20 text-[#F6F5F4] lg:px-28 lg:pt-28"
+      className="relative w-full overflow-hidden bg-[#0d0c0b] px-5 pt-16 text-[#F6F5F4] sm:px-8 sm:pt-20 lg:px-28 lg:pt-28"
     >
-      <div className="grid gap-12 text-xs font-medium uppercase tracking-[0.25em] sm:grid-cols-2 lg:grid-cols-4">
-        <div className="space-y-3 text-white/60">
+      {/* Info grid */}
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 text-[11px] font-medium uppercase tracking-[0.2em] sm:text-xs sm:tracking-[0.25em] lg:grid-cols-4 lg:gap-12">
+        <div className="col-span-2 space-y-3 text-white/60 lg:col-span-1">
           <p className="text-white">Studio</p>
           <p className="leading-relaxed">
             House 00, Road 00
@@ -86,7 +112,12 @@ export default function Footer() {
           <ul className="space-y-3">
             {socials.map((s) => (
               <li key={s.label}>
-                <a href={s.href} target="_blank" rel="noopener noreferrer" className={linkCls}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkCls}
+                >
                   {s.label}
                 </a>
               </li>
@@ -94,27 +125,37 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div className="space-y-3 text-white/60">
+        <div className="col-span-2 space-y-3 text-white/60 lg:col-span-1">
           <p className="text-white">Say hello</p>
-          <a href="mailto:hello@yourstudio.com" className={`${linkCls} normal-case tracking-normal text-sm`}>
+          <a
+            href="mailto:hello@yourstudio.com"
+            className={`${linkCls} break-all normal-case tracking-normal text-sm`}
+          >
             hello@yourstudio.com
           </a>
         </div>
       </div>
 
-      {/* Big name */}
-      <div className="ft-name mt-20 overflow-hidden lg:mt-28">
+      {/* Big name: container width e fit */}
+      <div
+        ref={wrapRef}
+        className="ft-name mt-16 w-full overflow-hidden sm:mt-20 lg:mt-28"
+      >
         <h2
+          ref={nameRef}
           aria-label={STUDIO}
-          className="ft-name-inner block whitespace-nowrap text-center font-serif font-bold uppercase leading-[0.8] tracking-tight"
-          style={{ fontSize: "clamp(3rem, 15.5vw, 16rem)" }}
+          className="ft-name-inner block w-max whitespace-nowrap pb-[0.18em] pt-[0.08em] font-serif font-bold uppercase leading-[1] tracking-tight"
+          style={{ fontSize: "12vw" }}
         >
           {STUDIO}
         </h2>
       </div>
 
-      <div className="flex flex-col gap-2 py-8 text-[10px] font-medium uppercase tracking-[0.25em] text-white/40 sm:flex-row sm:justify-between">
-        <p>© {new Date().getFullYear()} {STUDIO}. All rights reserved.</p>
+      {/* Copyright */}
+      <div className="flex flex-col gap-2 py-6 text-[10px] font-medium uppercase tracking-[0.2em] text-white/40 sm:flex-row sm:justify-between sm:py-8 sm:tracking-[0.25em]">
+        <p>
+          © {new Date().getFullYear()} {STUDIO}. All rights reserved.
+        </p>
         <p>Dhaka, Bangladesh</p>
       </div>
     </footer>

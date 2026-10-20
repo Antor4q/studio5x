@@ -349,7 +349,7 @@ export default function Projects() {
           {projects.map((p, i) => (
             <article key={p.slug} className="fp-item">
               <Link
-                href={`/work/${p.slug}`}
+                href={`/`}
                 aria-label={p.name}
                 className="fp-card group/card block"
               >

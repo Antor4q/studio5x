@@ -6,11 +6,11 @@ import Image from "next/image";
 import gsap from "gsap";
 
 const links = [
-  { label: "Home", href: "/", image: "/images/ina-04.jpg" },
-  { label: "Work", href: "/work", image: "/images/ina-04.jpg" },
-  { label: "About", href: "/about", image: "/images/ina-04.jpg" },
-  { label: "Services", href: "/services", image: "/images/ina-04.jpg" },
-  { label: "Contact", href: "/contact", image: "/images/ina-04.jpg" },
+  { label: "Home", href: "/", image: "/images/se1.jpg" },
+  { label: "Work", href: "/", image: "/images/se2.jpg" },
+  { label: "About", href: "/t", image: "/images/se3.jpg" },
+  { label: "Services", href: "/", image: "/images/se4.jpg" },
+  { label: "Contact", href: "/", image: "/images/pro2.jpg" },
 ];
 
 export default function Navbar() {
@@ -240,14 +240,14 @@ export default function Navbar() {
             >
               <span className="grid overflow-hidden leading-[1.4]">
                 <span
-                  className={`col-start-1 row-start-1 transition-transform duration-500 ease-in-out ${
+                  className={`col-start-1 row-start-1 transition-transform cursor-pointer duration-500 ease-in-out ${
                     open ? "-translate-y-full" : "translate-y-0"
                   }`}
                 >
                   Menu
                 </span>
                 <span
-                  className={`col-start-1 row-start-1 transition-transform duration-500 ease-in-out ${
+                  className={`col-start-1 row-start-1 cursor-pointer transition-transform duration-500 ease-in-out ${
                     open ? "translate-y-0" : "translate-y-full"
                   }`}
                 >

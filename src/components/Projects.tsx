@@ -326,7 +326,7 @@ export default function Projects() {
                   <span className="block overflow-hidden">
                     <span className="fp-line block">
                       <Link
-                        href={`/work/${p.slug}`}
+                        href={`/`}
                         className="group/link inline-flex items-center gap-3 text-xs font-medium tracking-[0.25em]"
                       >
                         <span className="border-b border-white/40 pb-1 transition-colors group-hover/link:border-white">

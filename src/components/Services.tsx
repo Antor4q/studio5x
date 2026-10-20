@@ -175,7 +175,7 @@ export default function Services() {
             className="fp-wrap sticky top-0 h-[80svh] w-full bg-[#F6F5F4] px-5 pb-5 pt-16 sm:h-[82svh] sm:px-8 sm:pb-6 sm:pt-20 md:px-12 lg:h-[85svh] lg:px-28 lg:pb-8 lg:pt-12"
           >
             <Link
-              href={`/services/${s.slug}`}
+              href={`/`}
               aria-label={s.name}
               className="fp-card group/card relative block h-full w-full overflow-hidden bg-black text-[#F6F5F4] will-change-transform"
             >

@@ -241,7 +241,7 @@ export default function Intro() {
               </div>
 
               <Link
-                href="/about"
+                href="/"
                 className="intro-fade group mt-10 inline-flex items-center gap-3 text-sm font-medium tracking-widest lg:mt-12"
               >
                 <span className="border-b border-white/40 pb-1 transition-colors group-hover:border-white">
